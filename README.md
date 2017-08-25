@@ -1,6 +1,6 @@
 # Rubrik Chef Cookbook
 ## Overview
-The Rubrik Chef cookbook is used to interact with a Rubrik cluster using Chef.
+The Rubrik Chef cookbook is used to configure a host with an SLA domain, and install the Rubrik connector.
 ## Requirements
 The following node attributes should be defined in order to use this cookbook:
 
@@ -66,3 +66,10 @@ Example output:
 [2017-08-25T02:38:24-07:00] INFO: Processing rubrik_set_sla[set] action set (rubrik::default line 15)
 [2017-08-25T02:38:27-07:00] INFO: Updated SLA domain to: Silver
 ```
+
+### Recipes
+#### connector.rb
+This recipe will install the connector on a RedHat, Debian, or Windows based system, pulling the connector install package from the cluster, and installing it.
+
+## Limitations
+Presently only works with VMware virtual machines, and relies on the vCenter being up to date in the Rubrik cluster.

@@ -1,9 +1,11 @@
 #
-# Cookbook:: rubrikconnector
-# Recipe:: rubrikconnector
+# Cookbook:: rubrik
+# Recipe:: connector
 #
 # Copyright:: 2017, The Authors, All Rights Reserved.
-
+#
+# Installs the Rubrik connector
+#
 # Disable OpenSSL certificate verification - this assumes that the Rubrik
 # cluster is presenting a self-signed certificate, which will cause the
 # 'remote_file' resource to reject the download
@@ -32,19 +34,20 @@ end
 
 # Pull the installer down from the cluster
 remote_file 'connector_installer' do
-  source 'https://' + node['rubrik_host'] + '/' + download_uri
+  source node['rubrik_host'] + '/' + download_uri
   path target_file
   action :create
   not_if { ::File.exist?(test_file) }
 end
 
 # For the Windows download we need to extract the ZIP
-windows_zipfile 'C:\Windows\Temp\RubrikBackupService.zip' do
-  source 'C:\Windows\Temp\RubrikBackupService.zip'
-  action :unzip
-  overwrite true
-  target_file = 'C:\Windows\Temp\\'
-  only_if { node['platform'] == 'windows' }
+if node['platform'] == 'windows'
+  windows_zipfile 'C:\Windows\Temp\RubrikBackupService.zip' do
+    source 'C:\Windows\Temp\RubrikBackupService.zip'
+    action :unzip
+    overwrite true
+    target_file = 'C:\Windows\Temp\\'
+  end
 end
 
 # Install the software, using the relevant installer for the platform
@@ -53,10 +56,10 @@ declare_resource(pkg_resource, target_file) do
   not_if { ::File.exist?(test_file) }
 end
 
-# If we are on Windows
-windows_service 'Rubrik Backup Service' do
-  startup_type :automatic
-  run_as_user node['rubrik_win_sa_user']
-  run_as_password node['rubrik_win_sa_pass']
-  only_if { node['platform'] == 'windows' }
+if node['platform'] == 'windows'
+  windows_service 'Rubrik Backup Service' do
+    startup_type :automatic
+    run_as_user node['rubrik_win_sa_user']
+    run_as_password node['rubrik_win_sa_pass']
+  end
 end

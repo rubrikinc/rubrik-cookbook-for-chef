@@ -137,13 +137,14 @@ module Rubrik
             return vm
           end
         end
+        return 'error'
       end
       # Update VM
       def self.update_vm_config(hosturi, token, vm_id, new_config)
         url = URI(hosturi + '/api/v1/vmware/vm/' + vm_id)
         response = Api::Helpers.http_patch_request(url, token, new_config)
         if response.code != '200'
-          return 'Something went wrong'
+          return 'error'
         end
         body = JSON.parse(response.read_body)
         body
@@ -263,14 +264,23 @@ module Rubrik
         if vm_data == 'error'
           vm_data = Api::VM.get_single_vm_by_ip(hosturi, token, vm_info[1])
         end
+        if vm_data == 'error'
+          raise ('VMware Virtual Machine with name ' + vm_info[0] + ' or IP address ' + vm_info[1] + ' not found.')
+        end
         vm_data[0]['configuredSlaDomainName']
       end
       # Set the SLA domain for a given VM
       def self.set_vm_sla_domain(hosturi, token, vm_info, sla_domain)
         vm_id = ConfMgmt::Helpers.get_vm_id(hosturi, token, vm_info)
         sla_domain_id = ConfMgmt::Helpers.get_sla_domain_id(hosturi, token, sla_domain)
+        if sla_domain_id == 'error'
+          raise ('SLA Domain with name ' + sla_domain + ' not found.')
+        end
         update_props = '{"configuredSlaDomainId": "' + sla_domain_id + '"}'
         update_sla_task = Api::VM.update_vm_config(hosturi, token, vm_id, update_props)
+        if update_sla_task == 'error'
+          raise ('Something went wrong adding ' + vm_info[0] + ' to SLA domain ' + sla_domain)
+        end
         update_sla_task
       end
     end
@@ -281,11 +291,17 @@ module Rubrik
         if vm_data == 'error'
           vm_data = Api::VM.get_single_vm_by_ip(hosturi, token, vm_info[1])
         end
+        if vm_data == 'error'
+          raise ('VMware Virtual Machine with name ' + vm_info[0] + ' or IP address ' + vm_info[1] + ' not found.')
+        end
         vm_data[0]['id']
       end
       # Get the SLA domain ID for a given SLA domain
       def self.get_sla_domain_id(hosturi, token, sla_domain)
         sla_domain_data = Api::SlaDomain.get_sla_domain_by_name(hosturi, token, sla_domain)
+        if sla_domain_id == 'error'
+          raise ('SLA Domain with name ' + sla_domain + ' not found.')
+        end
         sla_domain_data[0]['id']
       end
     end
