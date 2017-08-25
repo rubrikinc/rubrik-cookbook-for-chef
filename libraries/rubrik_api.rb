@@ -176,9 +176,6 @@ module Rubrik
         request['Content-Type'] = 'application/json'
         request['Authorization'] = 'Bearer ' + token
         response = http.request(request)
-        if response.code == '204'
-          puts 'Session deleted'
-        end
       end
     end
 

@@ -17,7 +17,7 @@ when 'windows'
   download_uri = 'connector/RubrikBackupService.zip'
   target_file = 'C:\Windows\Temp\RubrikBackupService.zip'
   pkg_resource = :windows_package
-  test_file = nil # need to add this when I know it
+  test_file = 'C:\Program Files\Rubrik\Rubrik Backup Service\rbs.exe'
 when 'centos','redhat','fedora','suse'
   download_uri = 'connector/rubrik-agent.x86_64.rpm'
   target_file = '/tmp/rubrik-agent.x86_64.rpm'
