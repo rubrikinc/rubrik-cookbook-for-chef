@@ -7,7 +7,7 @@ The following node attributes should be defined in order to use this cookbook:
 Attribute Name | Example Value
 --- | ---
 rubrik_host | https://clustera.demo.com
-rubrik_username | john.doe@demo.com'
+rubrik_username | john.doe@demo.com
 rubrik_password | Rubrik123!
 rubrik_sla_domain | Gold
 rubrik_win_sa_user | sa_rubrik@demo.com
@@ -53,7 +53,7 @@ Example output:
 [2017-08-25T02:38:24-07:00] INFO: Current SLA domain is: Silver
 ```
 ##### Action: set
-Sets the SLA domain for the host to the value set in `node.['rubrik_sla_domain']`.
+Sets the SLA domain for the host to the value set in `node['rubrik_sla_domain']`.
 
 Example usage:
 ```ruby
