@@ -1,6 +1,6 @@
 use_inline_resources
 
-action :list do
+action :get do
   token = Rubrik::Api::Session.post_session(node['rubrik_host'], node['rubrik_username'], node['rubrik_password'])
   # get cluster details
   puts "\r\nCluster ID: " + Rubrik::Api::Cluster.get_cluster_id(node['rubrik_host'], token)

@@ -5,13 +5,14 @@ module Rubrik
   require 'net/http'
   require 'openssl'
   require 'json'
+  # Direct API integrations
   module Api
     # Cluster management
     module Cluster
       # Get cluster details
       def self.get_cluster_id(hosturi, token)
         url = URI(hosturi + '/api/v1/cluster/me')
-        response = Helpers.http_get_request(url, token)
+        response = Api::Helpers.http_get_request(url, token)
         body = JSON.parse(response.read_body)
         body['id']
       end
@@ -19,7 +20,7 @@ module Rubrik
       # Get cluster software version
       def self.get_cluster_version(hosturi, token)
         url = URI(hosturi + '/api/v1/cluster/me/version')
-        response = Helpers.http_get_request(url, token)
+        response = Api::Helpers.http_get_request(url, token)
         body = JSON.parse(response.read_body)
         body['version']
       end
@@ -27,7 +28,7 @@ module Rubrik
       # Get cluster API version
       def self.get_cluster_api_version(hosturi, token)
         url = URI(hosturi + '/api/v1/cluster/me/api_version')
-        response = Helpers.http_get_request(url, token)
+        response = Api::Helpers.http_get_request(url, token)
         body = JSON.parse(response.read_body)
         body['apiVersion']
       end
@@ -91,6 +92,63 @@ module Rubrik
       end
     end
 
+    # SLA domain operations
+    module SlaDomain
+      # Get all SLA domains
+      def self.get_all_sla_domains(hosturi, token)
+        url = URI(hosturi + '/api/v1/sla_domain?primary_cluster_id=local')
+      end
+      # Get a single SLA domain by name
+      def self.get_sla_domain_by_name(hosturi, token, sla_domain)
+        url = URI(hosturi + '/api/v1/sla_domain?primary_cluster_id=local&name=' + sla_domain)
+        response = Api::Helpers.http_get_request(url, token)
+        body = JSON.parse(response.read_body)
+        if body['total'] != 1
+          return 'error'
+        end
+        body['data']
+      end
+    end
+
+    # VM operations
+    module VM
+      # Get all VM summary
+      def self.get_all_vms(hosturi, token)
+        url = URI(hosturi + '/api/v1/vmware/vm?primary_cluster_id=local')
+        response = Api::Helpers.http_get_request(url, token)
+        body = JSON.parse(response.read_body)
+        body['data']
+      end
+      # Get summary of a single VM by name
+      def self.get_single_vm_by_name(hosturi, token, vm_name)
+        url = URI(hosturi + '/api/v1/vmware/vm?primary_cluster_id=local&name=' + vm_name)
+        response = Api::Helpers.http_get_request(url, token)
+        body = JSON.parse(response.read_body)
+        if body['total'] != 1
+          return 'error'
+        end
+        body['data']
+      end
+      # Get summary of a single VM by IP
+      def self.get_single_vm_by_ip(hosturi, token, vm_ip)
+        all_vms = Api::VM::get_all_vms(hosturi, token)
+        for vm in all_vms
+          if vm['ipAddress'] == vm_ip
+            return vm
+          end
+        end
+      end
+      # Update VM
+      def self.update_vm_config(hosturi, token, vm_id, new_config)
+        url = URI(hosturi + '/api/v1/vmware/vm/' + vm_id)
+        response = Api::Helpers.http_patch_request(url, token, new_config)
+        if response.code != '200'
+          return 'Something went wrong'
+        end
+        body = JSON.parse(response.read_body)
+        body
+      end
+    end
     # Session management
     module Session
       # Create new session
@@ -167,6 +225,20 @@ module Rubrik
         # foo
       end
 
+      # PATCH request
+      def self.http_patch_request(hosturl, token, body)
+        http = Net::HTTP.new(hosturl.host, hosturl.port)
+        http.use_ssl = true
+        http.verify_mode = OpenSSL::SSL::VERIFY_NONE
+        request = Net::HTTP::Patch.new(hosturl)
+        request['Content-Type'] = 'application/json'
+        request['Accept'] = 'application/json'
+        request['Authorization'] = 'Bearer ' + token
+        request.body = body
+        response = http.request(request)
+        response
+      end
+
       # Test credential set
       def self.test_credentials(hosturl, credentials)
         uri = '/api/v1/cluster/me'
@@ -182,6 +254,42 @@ module Rubrik
           puts 'Invalid credentials detected, please retry'
           exit
         end
+      end
+    end
+  end
+  # Configuration Management functions
+  module ConfMgmt
+    module Core
+      # Get the SLA domain for a given VM
+      def self.get_vm_sla_domain(hosturi, token, vm_info)
+        vm_data = Api::VM.get_single_vm_by_name(hosturi, token, vm_info[0])
+        if vm_data == 'error'
+          vm_data = Api::VM.get_single_vm_by_ip(hosturi, token, vm_info[1])
+        end
+        vm_data[0]['configuredSlaDomainName']
+      end
+      # Set the SLA domain for a given VM
+      def self.set_vm_sla_domain(hosturi, token, vm_info, sla_domain)
+        vm_id = ConfMgmt::Helpers.get_vm_id(hosturi, token, vm_info)
+        sla_domain_id = ConfMgmt::Helpers.get_sla_domain_id(hosturi, token, sla_domain)
+        update_props = '{"configuredSlaDomainId": "' + sla_domain_id + '"}'
+        update_sla_task = Api::VM.update_vm_config(hosturi, token, vm_id, update_props)
+        update_sla_task
+      end
+    end
+    module Helpers
+      # Get the VM ID for a given VM
+      def self.get_vm_id(hosturi, token, vm_info)
+        vm_data = Api::VM.get_single_vm_by_name(hosturi, token, vm_info[0])
+        if vm_data == 'error'
+          vm_data = Api::VM.get_single_vm_by_ip(hosturi, token, vm_info[1])
+        end
+        vm_data[0]['id']
+      end
+      # Get the SLA domain ID for a given SLA domain
+      def self.get_sla_domain_id(hosturi, token, sla_domain)
+        sla_domain_data = Api::SlaDomain.get_sla_domain_by_name(hosturi, token, sla_domain)
+        sla_domain_data[0]['id']
       end
     end
   end
