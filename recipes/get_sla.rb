@@ -6,6 +6,6 @@
 #
 # Pulls out information on the current SLA for the host
 #
-rubrik_set_sla 'set' do
+rubrik_set_sla 'get' do
   action :get
 end
