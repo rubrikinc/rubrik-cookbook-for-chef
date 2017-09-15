@@ -103,8 +103,15 @@ module Rubrik
         url = URI(hosturi + '/api/v1/sla_domain?primary_cluster_id=local&name=' + sla_domain)
         response = Api::Helpers.http_get_request(url, token)
         body = JSON.parse(response.read_body)
-        if body['total'] != 1
+        if body['total'] == 0
           return 'error'
+        end
+        if body['total'] > 1
+          for ret_domain in body['data']
+            if ret_domain['name'] == sla_domain
+              ret_domain
+            end
+          end
         end
         body['data']
       end
