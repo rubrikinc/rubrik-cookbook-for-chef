@@ -7,5 +7,5 @@
 # Displays information about the cluster in the chef-client log
 #
 rubrik_cluster_info 'get' do
-  action :list
+  action :get
 end
