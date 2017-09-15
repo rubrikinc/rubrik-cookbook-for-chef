@@ -299,7 +299,7 @@ module Rubrik
       # Get the SLA domain ID for a given SLA domain
       def self.get_sla_domain_id(hosturi, token, sla_domain)
         sla_domain_data = Api::SlaDomain.get_sla_domain_by_name(hosturi, token, sla_domain)
-        if sla_domain_id == 'error'
+        if sla_domain_data == 'error'
           raise ('SLA Domain with name ' + sla_domain + ' not found.')
         end
         sla_domain_data[0]['id']
