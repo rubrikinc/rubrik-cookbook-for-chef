@@ -131,8 +131,15 @@ module Rubrik
         url = URI(hosturi + '/api/v1/vmware/vm?primary_cluster_id=local&name=' + vm_name)
         response = Api::Helpers.http_get_request(url, token)
         body = JSON.parse(response.read_body)
-        if body['total'] != 1
+        if body['total'] == 0
           return 'error'
+        end
+        if body['total'] > 1
+          for ret_vm in body['data']
+            if ret_vm['name'] == vm_name
+              ret_vm
+            end
+          end
         end
         body['data']
       end
