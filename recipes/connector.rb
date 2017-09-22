@@ -34,7 +34,7 @@ end
 
 # Pull the installer down from the cluster
 remote_file 'connector_installer' do
-  source node['rubrik_host'] + '/' + download_uri
+  source 'https://' + node['rubrik_host'] + '/' + download_uri
   path target_file
   action :create
   not_if { ::File.exist?(test_file) }
