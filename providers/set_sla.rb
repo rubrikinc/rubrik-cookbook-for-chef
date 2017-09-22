@@ -19,12 +19,17 @@ action :set do
     Chef::Log.error "Something went wrong connecting to the Rubrik cluster"
     exit
   end
-  domain_update = Rubrik::ConfMgmt::Core.set_vm_sla_domain('https://' + node['rubrik_host'], token, [ node['hostname'], node['ipaddress'] ], node['rubrik_sla_domain'])
-  if domain_update.nil?
-    Chef::Log.error "Something went wrong updating the SLA domain"
-    exit
+  current_domain = Rubrik::ConfMgmt::Core.get_vm_sla_domain('https://' + node['rubrik_host'], token, [ node['hostname'], node['ipaddress'] ])
+  if current_domain != node['rubrik_sla_domain']
+    domain_update = Rubrik::ConfMgmt::Core.set_vm_sla_domain('https://' + node['rubrik_host'], token, [ node['hostname'], node['ipaddress'] ], node['rubrik_sla_domain'])
+    if domain_update.nil?
+      Chef::Log.error "Something went wrong updating the SLA domain"
+      exit
+    end
+    Chef::Log.info ("Updated SLA domain to: " + node['rubrik_sla_domain'])
+  else
+    Chef::Log.info ("SLA domain already set to: " + node['rubrik_sla_domain'] + ", nothing to do...")
   end
-  Chef::Log.info ("Updated SLA domain to: " + node['rubrik_sla_domain'])
   Rubrik::Api::Session.delete_session('https://' + node['rubrik_host'], token)
   new_resource.updated_by_last_action(true)
 end
