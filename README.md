@@ -6,7 +6,7 @@ The following node attributes should be defined in order to use this cookbook:
 
 Attribute Name | Example Value
 --- | ---
-rubrik_host | https://clustera.demo.com
+rubrik_host | clustera.demo.com
 rubrik_username | john.doe@demo.com
 rubrik_password | Rubrik123!
 rubrik_sla_domain | Gold
@@ -14,7 +14,7 @@ rubrik_win_sa_user | sa_rubrik@demo.com
 rubrik_win_sa_pass | Rubrik123!
 
 Note that 'rubrik_win_sa_user' and 'rubrik_win_sa_pass' are optional, and will only be required if installing the
-connector on a Windows system.
+connector on a Windows system. If these are omitted then the service will run as LocalSystem.
 
 ## Detail
 The resources and providers used are defined in `libraries/rubrik_api.rb`, this module is subject to on-going development.
@@ -70,6 +70,16 @@ Example output:
 ### Recipes
 #### connector.rb
 This recipe will install the connector on a RedHat, Debian, or Windows based system, pulling the connector install package from the cluster, and installing it.
+
+##### Action: default
+Installs the Rubrik connector on the target system, and configures it with the service account (Windows only) defined in the `rubrik_win_sa_user` and `rubrik_win_sa_pass` node variables.
+
+Example usage:
+```ruby
+rubrik_connector 'install' do
+  action :set
+end
+```
 
 ## Limitations
 Presently only works with VMware virtual machines, and relies on the vCenter being up to date in the Rubrik cluster.
