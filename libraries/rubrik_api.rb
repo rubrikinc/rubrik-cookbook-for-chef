@@ -118,7 +118,7 @@ module Rubrik
     end
 
     # VM operations
-    module VM
+    module Vmware
       # Get all VM summary
       def self.get_all_vms(hosturi, token)
         url = URI(hosturi + '/api/v1/vmware/vm?primary_cluster_id=local')
@@ -145,7 +145,7 @@ module Rubrik
       end
       # Get summary of a single VM by IP
       def self.get_single_vm_by_ip(hosturi, token, vm_ip)
-        all_vms = Api::VM::get_all_vms(hosturi, token)
+        all_vms = Api::Vmware::get_all_vms(hosturi, token)
         for vm in all_vms
           if vm['ipAddress'] == vm_ip
             return vm
@@ -273,10 +273,10 @@ module Rubrik
   module ConfMgmt
     module Core
       # Get the SLA domain for a given VM
-      def self.get_vm_sla_domain(hosturi, token, vm_info)
-        vm_data = Api::VM.get_single_vm_by_name(hosturi, token, vm_info[0])
+      def self.get_vmware_vm_sla_domain(hosturi, token, vm_info)
+        vm_data = Api::Vmware.get_single_vm_by_name(hosturi, token, vm_info[0])
         if vm_data == 'error'
-          vm_data = Api::VM.get_single_vm_by_ip(hosturi, token, vm_info[1])
+          vm_data = Api::Vmware.get_single_vm_by_ip(hosturi, token, vm_info[1])
         end
         if vm_data == 'error'
           raise ('VMware Virtual Machine with name ' + vm_info[0] + ' or IP address ' + vm_info[1] + ' not found.')
@@ -284,14 +284,14 @@ module Rubrik
         vm_data[0]['configuredSlaDomainName']
       end
       # Set the SLA domain for a given VM
-      def self.set_vm_sla_domain(hosturi, token, vm_info, sla_domain)
+      def self.set_vmware_vm_sla_domain(hosturi, token, vm_info, sla_domain)
         vm_id = ConfMgmt::Helpers.get_vm_id(hosturi, token, vm_info)
         sla_domain_id = ConfMgmt::Helpers.get_sla_domain_id(hosturi, token, sla_domain)
         if sla_domain_id == 'error'
           raise ('SLA Domain with name ' + sla_domain + ' not found.')
         end
         update_props = '{"configuredSlaDomainId": "' + sla_domain_id + '"}'
-        update_sla_task = Api::VM.update_vm_config(hosturi, token, vm_id, update_props)
+        update_sla_task = Api::Vmware.update_vm_config(hosturi, token, vm_id, update_props)
         if update_sla_task == 'error'
           raise ('Something went wrong adding ' + vm_info[0] + ' to SLA domain ' + sla_domain)
         end
@@ -300,10 +300,10 @@ module Rubrik
     end
     module Helpers
       # Get the VM ID for a given VM
-      def self.get_vm_id(hosturi, token, vm_info)
-        vm_data = Api::VM.get_single_vm_by_name(hosturi, token, vm_info[0])
+      def self.get_vmware_vm_id(hosturi, token, vm_info)
+        vm_data = Api::Vmware.get_single_vm_by_name(hosturi, token, vm_info[0])
         if vm_data == 'error'
-          vm_data = Api::VM.get_single_vm_by_ip(hosturi, token, vm_info[1])
+          vm_data = Api::Vmware.get_single_vm_by_ip(hosturi, token, vm_info[1])
         end
         if vm_data == 'error'
           raise ('VMware Virtual Machine with name ' + vm_info[0] + ' or IP address ' + vm_info[1] + ' not found.')
