@@ -14,7 +14,6 @@ action :set do
         sla_domain = Rubrik::ConfMgmt::Core.get_vmware_vm_sla_domain('https://' + node['rubrik_host'], token, [ node['hostname'], node['ipaddress'] ])
         Chef::Log.info ("Current SLA domain is: " + sla_domain)
     end
-    if (sla_domain == '')
     Chef::Log.info ("Getting ID for SLA domain: " + sla_domain)
     sla_domain_id = Rubrik::ConfMgmt::Helpers.get_sla_domain_id('https://' + node['rubrik_host'], token, sla_domain)
     
