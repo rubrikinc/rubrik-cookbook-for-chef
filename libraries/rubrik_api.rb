@@ -377,11 +377,9 @@ module Rubrik
         end
         conf_sla_domain_name = vm_data[0]['configuredSlaDomainName']
         if (conf_sla_domain_name != 'Inherit')
-          conf_sla_domain
+          return conf_sla_domain
         effective_sla_domain_name = vm_data[0]['effectiveSlaDomainName']
-        if (effective_sla_domain_name == 'Unprotected')
-          'Unprotected'
-        effective_sla_domain_name
+        return effective_sla_domain_name
 
       end
       # Set the SLA domain for a given VM
