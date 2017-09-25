@@ -375,7 +375,14 @@ module Rubrik
         if vm_data == 'error'
           raise ('VMware Virtual Machine with name ' + vm_info[0] + ' or IP address ' + vm_info[1] + ' not found.')
         end
-        vm_data[0]['configuredSlaDomainName']
+        conf_sla_domain_name = vm_data[0]['configuredSlaDomainName']
+        if (conf_sla_domain_name != 'Inherit')
+          conf_sla_domain
+        effective_sla_domain_name = vm_data[0]['effectiveSlaDomainName']
+        if (effective_sla_domain_name == 'Unprotected')
+          'Unprotected'
+        effective_sla_domain_name
+
       end
       # Set the SLA domain for a given VM
       def self.set_vmware_vm_sla_domain(hosturi, token, vm_info, sla_domain)
