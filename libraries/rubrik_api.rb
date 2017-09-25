@@ -164,6 +164,100 @@ module Rubrik
         body
       end
     end
+    # Nutanix
+    module Nutanix
+      # Get all VM summary
+      def self.get_all_vms(hosturi, token)
+        url = URI(hosturi + '/api/v1/nutanix/vm?primary_cluster_id=local')
+        response = Api::Helpers.http_get_request(url, token)
+        body = JSON.parse(response.read_body)
+        body['data']
+      end
+      # Get summary of a single VM by name
+      def self.get_single_vm_by_name(hosturi, token, vm_name)
+        url = URI(hosturi + '/api/v1/nutanix/vm?primary_cluster_id=local&name=' + vm_name)
+        response = Api::Helpers.http_get_request(url, token)
+        body = JSON.parse(response.read_body)
+        if body['total'] == 0
+          return 'error'
+        end
+        if body['total'] > 1
+          for ret_vm in body['data']
+            if ret_vm['name'] == vm_name
+              ret_vm
+            end
+          end
+        end
+        body['data']
+      end
+      # Get summary of a single VM by IP
+      def self.get_single_vm_by_ip(hosturi, token, vm_ip)
+        all_vms = Api::Nutanix::get_all_vms(hosturi, token)
+        for vm in all_vms
+          if vm['ipAddress'] == vm_ip
+            return vm
+          end
+        end
+        return 'error'
+      end
+      # Update VM
+      def self.update_vm_config(hosturi, token, vm_id, new_config)
+        url = URI(hosturi + '/api/v1/nutanix/vm/' + vm_id)
+        response = Api::Helpers.http_patch_request(url, token, new_config)
+        if response.code != '200'
+          return 'error'
+        end
+        body = JSON.parse(response.read_body)
+        body
+      end
+    end
+    # Hyper-V
+    module HyperV
+      # Get all VM summary
+      def self.get_all_vms(hosturi, token)
+        url = URI(hosturi + '/api/v1/hyperv/vm?primary_cluster_id=local')
+        response = Api::Helpers.http_get_request(url, token)
+        body = JSON.parse(response.read_body)
+        body['data']
+      end
+      # Get summary of a single VM by name
+      def self.get_single_vm_by_name(hosturi, token, vm_name)
+        url = URI(hosturi + '/api/v1/hyperv/vm?primary_cluster_id=local&name=' + vm_name)
+        response = Api::Helpers.http_get_request(url, token)
+        body = JSON.parse(response.read_body)
+        if body['total'] == 0
+          return 'error'
+        end
+        if body['total'] > 1
+          for ret_vm in body['data']
+            if ret_vm['name'] == vm_name
+              ret_vm
+            end
+          end
+        end
+        body['data']
+      end
+      # Get summary of a single VM by IP
+      def self.get_single_vm_by_ip(hosturi, token, vm_ip)
+        all_vms = Api::HyperV::get_all_vms(hosturi, token)
+        for vm in all_vms
+          if vm['ipAddress'] == vm_ip
+            return vm
+          end
+        end
+        return 'error'
+      end
+      # Update VM
+      def self.update_vm_config(hosturi, token, vm_id, new_config)
+        url = URI(hosturi + '/api/v1/hyperv/vm/' + vm_id)
+        response = Api::Helpers.http_patch_request(url, token, new_config)
+        if response.code != '200'
+          return 'error'
+        end
+        body = JSON.parse(response.read_body)
+        body
+      end
+    end
     # Session management
     module Session
       # Create new session
