@@ -435,7 +435,7 @@ module Rubrik
       end
       # Set the SLA domain for a given VM
       def self.set_vmware_vm_sla_domain(hosturi, token, vm_info, sla_domain)
-        vm_id = ConfMgmt::Helpers.get_vm_id(hosturi, token, vm_info)
+        vm_id = ConfMgmt::Helpers.get_vmware_vm_id(hosturi, token, vm_info)
         sla_domain_id = ConfMgmt::Helpers.get_sla_domain_id(hosturi, token, sla_domain)
         if sla_domain_id == 'error'
           raise ('SLA Domain with name ' + sla_domain + ' not found.')
