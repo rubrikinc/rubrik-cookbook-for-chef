@@ -8,5 +8,6 @@
 #
 
 rubrik_od_backup 'set' do
-    action :set   
+    action :set
+    sla_domain 'Gold'
 end

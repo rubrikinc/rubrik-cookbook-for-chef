@@ -34,6 +34,36 @@ module Rubrik
       end
     end
 
+    # vCenter operations
+    module Vcenter
+      # Get list of vCenter
+      def self.get_all_vcenters(hosturi, token)
+        uri = '/api/v1/api/v1/vmware/vcenter?primary_cluster_id=local'
+        url = URI(hosturi + uri)
+        response = Helpers.http_get_request(url, token)
+        body = JSON.parse(response.read_body)
+        body['data']
+      end
+      # Refresh single vCenter
+      def self.refresh_vcenter(hosturi, token, vcenter_id)
+        uri = '/api/v1/vmware/vcenter/'+vcenter_id+'/refresh'
+        url = URI(hosturi + uri)
+        response = Helpers.http_post_request(url, token, '{}')
+        if response.code != '202'
+          return 'error'
+        end
+        body = JSON.parse(response.read_body)
+        body
+      end
+      # Refresh all vCenters
+      def self.refresh_all_vcenters(hosturi, token)
+        all_vcenters = Vcenter.get_all_vcenters(hosturi, token)
+        for vcenter in all_vcenters
+          Vcenter.refresh_vcenter(hosturi, token, vcenter['id'])
+        end     
+      end
+    end
+
     # Fileset operations
     module Fileset
       # Get fileset summary
