@@ -163,6 +163,21 @@ module Rubrik
         body = JSON.parse(response.read_body)
         body
       end
+      # Take on-demand snapshot
+      def self.take_od_snapshot(hosturi, token, vm_id, sla_id)
+        url = URI(hosturi + '/api/v1/vmware/vm/' + vm_id + '/snapshot')
+        if (sla_id != nil)
+          body = '{"slaId":"'+ sla_id + '"}'
+        else
+          body = '{}'
+        end
+        response = Api::Helpers.http_post_request(url, token, body)
+        if response.code != '202'
+          return 'error'
+        end
+        body = JSON.parse(response.read_body)
+        body
+      end
     end
     # Nutanix
     module Nutanix
@@ -309,7 +324,12 @@ module Rubrik
         http.use_ssl = true
         http.verify_mode = OpenSSL::SSL::VERIFY_NONE
         request = Net::HTTP::Post.new(hosturl)
-
+        request['Accept'] = 'application/json'      
+        request['Content-Type'] = 'application/json'
+        request['Authorization'] = 'Bearer ' + token      
+        request.body = body
+        response = http.request(request)
+        response
       end
 
       # PUT request
@@ -376,13 +396,12 @@ module Rubrik
           raise ('VMware Virtual Machine with name ' + vm_info[0] + ' or IP address ' + vm_info[1] + ' not found.')
         end
         vm_data[0]['configuredSlaDomainName']
-        """
         conf_sla_domain_name = vm_data[0]['configuredSlaDomainName']
         if (conf_sla_domain_name != 'Inherit')
-          return conf_sla_domain
+          return conf_sla_domain_name
+        end 
         effective_sla_domain_name = vm_data[0]['effectiveSlaDomainName']
         return effective_sla_domain_name
-        """
       end
       # Set the SLA domain for a given VM
       def self.set_vmware_vm_sla_domain(hosturi, token, vm_info, sla_domain)
@@ -397,6 +416,14 @@ module Rubrik
           raise ('Something went wrong adding ' + vm_info[0] + ' to SLA domain ' + sla_domain)
         end
         update_sla_task
+      end
+      # Trigger an on-demand snapshot
+      def self.take_od_snapshot(hosturi, token, vm_id, sla_id)
+        od_snapshot_task = Api::Vmware.take_od_snapshot(hosturi, token, vm_id, sla_id)
+        if od_snapshot_task == 'error'
+          raise ('Something went wrong with the on-demand snapshot')
+        end
+        od_snapshot_task
       end
     end
     module Helpers
