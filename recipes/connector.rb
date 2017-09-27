@@ -42,12 +42,12 @@ end
 
 # For the Windows download we need to extract the ZIP
 if node['platform'] == 'windows'
-  windows_zipfile 'C:\Windows\Temp\RubrikBackupService.zip' do
+  windows_zipfile 'C:\Windows\Temp\\' do
     source 'C:\Windows\Temp\RubrikBackupService.zip'
     action :unzip
     overwrite true
-    target_file = 'C:\Windows\Temp\\'
   end
+  target_file = 'C:\Windows\Temp\RubrikBackupService.msi'
 end
 
 # Install the software, using the relevant installer for the platform
