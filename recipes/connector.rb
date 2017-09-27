@@ -54,12 +54,11 @@ end
 declare_resource(pkg_resource, target_file) do
   action :install
   not_if { ::File.exist?(test_file) }
+  notifies :run, "execute[Setting Log On User For Rubrik Backup Service]", :immediately
 end
 
-if node['platform'] == 'windows'
-  windows_service 'Rubrik Backup Service' do
-    startup_type :automatic
-    run_as_user node['rubrik_win_sa_user']
-    run_as_password node['rubrik_win_sa_pass']
-  end
+execute "Setting Log On User For Rubrik Backup Service" do
+  command "sc.exe config \"Rubrik Backup Service\" obj="+node['rubrik_win_sa_user']+" password="+node['rubrik_win_sa_pass']
+  action :nothing
+  only_if { node['platform'] == 'windows' }
 end
