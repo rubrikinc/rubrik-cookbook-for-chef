@@ -16,9 +16,12 @@ rubrik_password | Rubrik123!
 rubrik_sla_domain | Gold
 rubrik_win_sa_user | sa_rubrik@demo.com
 rubrik_win_sa_pass | Rubrik123!
+rubrik_fileset | ['fileset_1', 'fileset_2']
 
-Note that 'rubrik_win_sa_user' and 'rubrik_win_sa_pass' are optional, and will only be required if installing the
+Note that `rubrik_win_sa_user` and `rubrik_win_sa_pass` are optional, and will only be required if installing the
 connector on a Windows system. If these are omitted then the service will run as LocalSystem.
+
+Note that the `rubrik_fileset` attribute can take a single string, or an array of strings.
 
 ## Running recipes individually
 
@@ -203,6 +206,29 @@ Example output:
 [2017-10-09T03:16:11-07:00] INFO: This host has 2 filesets currently assigned
 [2017-10-09T03:16:11-07:00] INFO: Fileset 'Winner Chicken Dinner' found, with ID: Fileset:::ce5dcde7-937b-43cd-9efd-0ab9de56e363, and SLA domain: Silver
 [2017-10-09T03:16:11-07:00] INFO: Fileset 'Home dirs' found, with ID: Fileset:::cb0b04a7-b210-43e3-98a7-2250800138f9, and SLA domain: Silver
+```
+
+##### Action: set
+
+Reports on filesets configured for the current host.
+
+Example usage:
+
+```ruby
+rubrik_fileset 'set' do
+  action :set
+end
+```
+
+Example output:
+
+```none
+[2017-10-09T08:21:14-07:00] INFO: Processing rubrik_fileset[set] action set (rubrik::fileset line 9)
+[2017-10-09T08:21:15-07:00] INFO: Host Current host ID is: Host:::a7654d58-dd3e-4918-a635-66b888400820
+[2017-10-09T08:21:17-07:00] INFO: Fileset Home dirs found, but SLA domain is not correct, correcting...
+[2017-10-09T08:21:20-07:00] INFO: Fileset updated succesfully
+[2017-10-09T08:21:20-07:00] INFO: Fileset Winner Chicken Dinner found, but SLA domain is not correct, correcting...
+[2017-10-09T08:21:22-07:00] INFO: Fileset updated succesfully
 ```
 
 ### Recipes

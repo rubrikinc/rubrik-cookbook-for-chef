@@ -82,6 +82,32 @@ module Rubrik
         body = JSON.parse(response.read_body)
         body['data']
       end
+      # Get fileset for host by fileset name
+      def self.get_fileset_by_name_for_host(hosturi, token, host_id, fileset_name)
+        uri = '/api/v1/fileset?primary_cluster_id=local&is_relic=false&limit=20000&host_id=' + host_id + '&name=' + fileset_name
+        url = URI(hosturi + uri)
+        response = Helpers.http_get_request(url, token)
+        body = JSON.parse(response.read_body)
+        body['data']
+      end
+      # Create a fileset
+      def self.create_fileset(hosturi, token, host_id, fileset_template_id)
+        uri = '/api/v1/fileset'
+        url = URI(hosturi + uri)
+        body = '{"hostId":"' + host_id + '","templateId":"'+ fileset_template_id + '"}'       
+        response = Helpers.http_post_request(url, token, body)
+        body = JSON.parse(response.read_body)
+        body['data']
+      end
+      # Update a fileset
+      def self.update_fileset(hosturi, token, fileset_id, sla_domain_id)
+        uri = '/api/v1/fileset/' + fileset_id     
+        url = URI(hosturi + uri)
+        body = '{"configuredSlaDomainId":"'+ sla_domain_id + '"}'
+        response = Helpers.http_patch_request(url, token, body)
+        body = JSON.parse(response.read_body)
+        body
+      end
       # Get detail for a fileset
       def self.get_fileset_detail(hosturi, token, fileset_id)
         uri = '/api/v1/fileset/' + fileset_id
@@ -123,10 +149,20 @@ module Rubrik
     module FilesetTemplate
       # Get fileset template summary
       def self.get_fileset_template_summary(hosturi, token)
-        url = URI(hosturi + '/api/v1/fileset_template')
+        url = URI(hosturi + '/api/v1/fileset_template?primary_cluster_id=local')
         response = Helpers.http_get_request(url, token)
         body = JSON.parse(response.read_body)
         body['data']
+      end
+      # Get fileset template ID by name
+      def self.get_fileset_template_by_name(hosturi, token, template_name)
+        fileset_templates = FilesetTemplate.get_fileset_template_summary(hosturi, token)
+        for fileset_template in fileset_templates
+          if fileset_template['name'] == template_name
+            return fileset_template
+          end
+        end
+        return false
       end
     end
 

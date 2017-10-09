@@ -6,7 +6,6 @@
 #
 # Pulls out information on the current filesets for the host
 #
-rubrik_fileset 'get' do
-    action :get
-  end
-  
+rubrik_fileset 'set' do
+    action :set
+end
