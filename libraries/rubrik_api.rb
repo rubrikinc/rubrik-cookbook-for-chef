@@ -68,7 +68,15 @@ module Rubrik
     module Fileset
       # Get fileset summary
       def self.get_fileset_summary(hosturi, token)
-        uri = '/api/v1/api/v1/fileset'
+        uri = '/api/v1/api/v1/fileset?primary_cluster_id=local&is_relic=false&limit=20000'
+        url = URI(hosturi + uri)
+        response = Helpers.http_get_request(url, token)
+        body = JSON.parse(response.read_body)
+        body['data']
+      end
+      # Get fileset for host
+      def self.get_filesets_for_host(hosturi, token, host_id)
+        uri = '/api/v1/fileset?primary_cluster_id=local&is_relic=false&limit=20000&&host_id=' + host_id
         url = URI(hosturi + uri)
         response = Helpers.http_get_request(url, token)
         body = JSON.parse(response.read_body)
@@ -493,6 +501,16 @@ module Rubrik
           register_host = Rubrik::Api::Host.register_host(hosturi, token, host_alias)
           if register_host != 'error'
             return true
+          end
+        end
+        return false
+      end
+      # Get Host ID
+      def self.get_registered_host_id(hosturi, token, host_info)
+        all_hosts = Rubrik::Api::Host.get_all_hosts(hosturi, token)
+        for hostdata in all_hosts
+          if host_info.include? hostdata['hostname']
+            return hostdata['id']
           end
         end
         return false

@@ -40,6 +40,10 @@ The recipes can be run individually through the following commands:
 
 `sudo chef-client -z -r 'recipe[rubrik::od_backup]' -l info`
 
+### Register Host
+
+`sudo chef-client -z -r 'recipe[rubrik::register_host]' -l info`
+
 ## Detail
 
 The resources and providers used are defined in `libraries/rubrik_api.rb`, this module is subject to on-going development.
@@ -175,6 +179,30 @@ Example output:
 [2017-10-09T01:36:00-07:00] INFO: Processing rubrik_register_host[set] action set (rubrik::register_host line 1)
 [2017-10-09T01:36:01-07:00] INFO: Host is not registered against the Rubrik cluster, registering now
 [2017-10-09T01:36:01-07:00] INFO: Host registered successfully against the Rubrik cluster
+```
+
+#### fileset
+
+##### Action: get
+
+Reports on filesets configured for the current host.
+
+Example usage:
+
+```ruby
+rubrik_fileset 'get' do
+  action :get
+end
+```
+
+Example output:
+
+```none
+[2017-10-09T03:16:10-07:00] INFO: Processing rubrik_fileset[get] action get (rubrik::fileset line 9)
+[2017-10-09T03:16:11-07:00] INFO: Host Current host ID is: Host:::a7654d58-dd3e-4918-a635-66b888400820
+[2017-10-09T03:16:11-07:00] INFO: This host has 2 filesets currently assigned
+[2017-10-09T03:16:11-07:00] INFO: Fileset 'Winner Chicken Dinner' found, with ID: Fileset:::ce5dcde7-937b-43cd-9efd-0ab9de56e363, and SLA domain: Silver
+[2017-10-09T03:16:11-07:00] INFO: Fileset 'Home dirs' found, with ID: Fileset:::cb0b04a7-b210-43e3-98a7-2250800138f9, and SLA domain: Silver
 ```
 
 ### Recipes
