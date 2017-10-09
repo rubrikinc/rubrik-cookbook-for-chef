@@ -136,6 +136,47 @@ Example output:
 [2017-09-26T02:21:07-07:00] INFO: Snapshot initialisation complete
 ```
 
+#### register_host
+
+##### Action: get
+
+Checks if the current host is registered to the Rubrik cluster. This first checks using the hostname gathered by Ohai, and if this returns a 404, will try via IP address.
+
+Example usage:
+
+```ruby
+rubrik_register_host 'get' do
+  action :get
+end
+```
+
+Example output:
+
+```none
+[2017-10-09T01:35:38-07:00] INFO: Processing rubrik_register_host[get] action get (rubrik::register_host line 1)
+[2017-10-09T01:35:38-07:00] INFO: Host is not registered against the Rubrik cluster
+```
+
+##### Action: set
+
+Registers the host to the Rubrik cluster. This uses first the hostname gathered by Ohai, and if this returns a 404, will try via IP address.
+
+Example usage:
+
+```ruby
+rubrik_register_host 'set' do
+  action :set
+end
+```
+
+Example output:
+
+```none
+[2017-10-09T01:36:00-07:00] INFO: Processing rubrik_register_host[set] action set (rubrik::register_host line 1)
+[2017-10-09T01:36:01-07:00] INFO: Host is not registered against the Rubrik cluster, registering now
+[2017-10-09T01:36:01-07:00] INFO: Host registered successfully against the Rubrik cluster
+```
+
 ### Recipes
 
 #### connector.rb
