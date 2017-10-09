@@ -122,6 +122,28 @@ module Rubrik
       end
     end
 
+    # Linux hosts and Windows hosts
+    module Host
+      # Get all hosts
+      def self.get_all_hosts(hosturi, token)
+        url = URI(hosturi + '/api/v1/host?primary_cluster_id=local')
+        response = Helpers.http_get_request(url, token)
+        body = JSON.parse(response.read_body)
+        body['data']
+      end
+      # Create a host
+      def self.register_host(hosturi, token, hostname)
+        url = URI(hosturi + '/api/v1/host')
+        body = '{"hostname":"'+ hostname + '","hasAgent":true}'
+        response = Api::Helpers.http_post_request(url, token, body)
+        if response.code != '201'
+          return 'error'
+        end
+        body = JSON.parse(response.read_body)
+        body
+      end
+    end
+
     # SLA domain operations
     module SlaDomain
       # Get all SLA domains
@@ -454,6 +476,26 @@ module Rubrik
           raise ('Something went wrong with the on-demand snapshot')
         end
         od_snapshot_task
+      end
+      # Check if host is registered with cluster
+      def self.check_host_registered(hosturi, token, host_info)
+        all_hosts = Rubrik::Api::Host.get_all_hosts(hosturi, token)
+        for hostdata in all_hosts
+          if host_info.include? hostdata['hostname']
+            return true
+          end
+        end
+        return false
+      end
+      # Register host against cluster
+      def self.register_host(hosturi, token, host_info)
+        for host_alias in host_info
+          register_host = Rubrik::Api::Host.register_host(hosturi, token, host_alias)
+          if register_host != 'error'
+            return true
+          end
+        end
+        return false
       end
     end
     module Helpers
