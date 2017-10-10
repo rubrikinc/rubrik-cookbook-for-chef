@@ -6,6 +6,6 @@
 #
 # Registers the current host against the Rubrik cluster
 #
-rubrik_register_host 'set' do
-  action :set
+rubrik_register_host 'get' do
+  action :get
 end

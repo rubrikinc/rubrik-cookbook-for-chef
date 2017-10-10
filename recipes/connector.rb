@@ -61,4 +61,6 @@ execute "Setting Log On User For Rubrik Backup Service" do
   command "sc.exe config \"Rubrik Backup Service\" obj="+node['rubrik_win_sa_user']+" password="+node['rubrik_win_sa_pass']
   action :nothing
   only_if { node['platform'] == 'windows' }
+  only_if { node['rubrik_win_sa_user'] }
+  only_if { node['rubrik_win_sa_pass'] }
 end
