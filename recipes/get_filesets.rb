@@ -1,6 +1,6 @@
 #
 # Cookbook:: rubrik
-# Recipe:: fileset
+# Recipe:: get_filesets
 #
 # Copyright:: 2017, The Authors, All Rights Reserved.
 #

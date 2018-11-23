@@ -8,15 +8,15 @@ The Rubrik Chef cookbook is used to configure a host with an SLA domain, and ins
 
 The following node attributes should be defined in order to use this cookbook:
 
-Attribute Name | Example Value
---- | ---
-rubrik_host | clustera.demo.com
-rubrik_username | john.doe@demo.com
-rubrik_password | Rubrik123!
-rubrik_sla_domain | Gold
-rubrik_win_sa_user | sa_rubrik@demo.com
-rubrik_win_sa_pass | Rubrik123!
-rubrik_fileset | ['fileset_1', 'fileset_2']
+Attribute Name | Description | Example Value
+--- | --- | ---
+rubrik_host | Defines the IP/hostname of the Rubrik cluster to interact with | clustera.demo.com
+rubrik_username | Defines the username for the Rubrik cluster | john.doe@demo.com
+rubrik_password | Defines the password for the user defined above | Rubrik123!
+rubrik_sla_domain | Defines the Rubrik SLA Domain to protect objects with | Gold
+rubrik_win_sa_user | Windows systems - defines the login user for the Rubrik Backup Service | sa_rubrik@demo.com
+rubrik_win_sa_pass | Windows systems - defines the password for above RBS user | Rubrik123!
+rubrik_fileset | Defines a list of fileset templates used to create filesets on this host | ['fileset_1', 'fileset_2']
 
 Note that `rubrik_win_sa_user` and `rubrik_win_sa_pass` are optional, and will only be required if installing the
 connector on a Windows system. If these are omitted then the service will run as LocalSystem.
@@ -25,27 +25,59 @@ Note that the `rubrik_fileset` attribute can take a single string, or an array o
 
 ## Running recipes individually
 
-The recipes can be run individually through the following commands:
+The sample recipes included with the cookbook can be run individually through the following commands:
 
 ### Cluster Info
 
 `sudo chef-client -z -r 'recipe[rubrik::cluster_info]' -l info`
 
-### Get SLA
+### Get VMware VM SLA
 
-`sudo chef-client -z -r 'recipe[rubrik::get_sla]' -l info`
+`sudo chef-client -z -r 'recipe[rubrik::get_vmware_vm_sla]' -l info`
 
-### Set SLA
+### Set VMware VM SLA
 
-`sudo chef-client -z -r 'recipe[rubrik::set_sla]' -l info`
+`sudo chef-client -z -r 'recipe[rubrik::set_vmware_vm_sla]' -l info`
 
-### On-Demand Snapshot
+### On-Demand VMware Snapshot
 
-`sudo chef-client -z -r 'recipe[rubrik::od_backup]' -l info`
+`sudo chef-client -z -r 'recipe[rubrik::snapshot_vmware_vm]' -l info`
 
 ### Register Host
 
-`sudo chef-client -z -r 'recipe[rubrik::register_host]' -l info`
+`sudo chef-client -z -r 'recipe[rubrik::set_host_registration]' -l info`
+
+### Get Host Registration Status
+
+`sudo chef-client -z -r 'recipe[rubrik::get_host_registration]' -l info`
+
+### Get SQL Server Host SLA
+
+`sudo chef-client -z -r 'recipe[rubrik::get_sql_host_sla]' -l info`
+
+### Set SQL Server Host SLA
+
+`sudo chef-client -z -r 'recipe[rubrik::set_sql_host_sla]' -l info`
+
+### Create Filesets
+
+`sudo chef-client -z -r 'recipe[rubrik::create_fileset]' -l info`
+
+### Get Fileset Details
+
+`sudo chef-client -z -r 'recipe[rubrik::get_filesets]' -l info`
+
+### Install Rubrik Connector
+
+`sudo chef-client -z -r 'recipe[rubrik::connector]' -l info`
+
+### Refresh Host
+
+`sudo chef-client -z -r 'recipe[rubrik::refresh_host]' -l info`
+
+### Refresh All vCenter Servers
+
+`sudo chef-client -z -r 'recipe[rubrik::refresh_all_vcenters]' -l info`
 
 ## Detail
 
@@ -77,7 +109,7 @@ Example output:
 [2017-08-25T02:38:22-07:00] INFO: Cluster API version: 1
 ```
 
-#### set_sla
+#### set_vmware_vm_sla
 
 ##### Action: get
 
@@ -86,7 +118,7 @@ Dumps the current SLA domain for the host to the Chef log.
 Example usage:
 
 ```ruby
-rubrik_set_sla 'get' do
+rubrik_set_vmware_vm_sla 'get' do
   action :get
 end
 ```
@@ -105,7 +137,7 @@ Sets the SLA domain for the host to the value set in `node['rubrik_sla_domain']`
 Example usage:
 
 ```ruby
-rubrik_set_sla 'set' do
+rubrik_set_vmware_vm_sla 'set' do
   action :set
 end
 ```
@@ -117,7 +149,15 @@ Example output:
 [2017-08-25T02:38:27-07:00] INFO: Updated SLA domain to: Silver
 ```
 
-#### od_backup
+Optional Properties:
+
+The following optional parameters can be used when defining this resource:
+
+Property name | Description | Default Value
+--- | --- | ---
+`crash_consistent` | Specifies whether to force crash consistent snapshots, can be `true` or `false` | `false`
+
+#### snapshot_vmware_vm
 
 ##### Action: set
 
@@ -126,7 +166,7 @@ Takes an on-demand backup of the local machine.
 Example usage:
 
 ```ruby
-rubrik_od_backup 'set' do
+rubrik_snapshot_vmware_vm 'set' do
     action :set
     sla_domain 'Gold'
 end
@@ -229,6 +269,67 @@ Example output:
 [2017-10-09T08:21:20-07:00] INFO: Fileset updated succesfully
 [2017-10-09T08:21:20-07:00] INFO: Fileset Winner Chicken Dinner found, but SLA domain is not correct, correcting...
 [2017-10-09T08:21:22-07:00] INFO: Fileset updated succesfully
+```
+
+#### set_sql_host_sla
+
+##### Action: get
+
+Gets the SLA domain associated with all instances on the host
+
+```ruby
+rubrik_set_sql_host_sla 'get' do
+  action :get
+end
+```
+
+##### Action: set
+
+Sets the SLA domain protection for all instances on the host
+
+Example usage:
+
+```ruby
+rubrik_set_sql_host_sla 'set' do
+  action :set
+end
+```
+
+Optional Properties:
+
+The following optional parameters can be used when defining this resource:
+
+Property name | Description | Default Value
+--- | --- | ---
+`log_backup_freq_minutes` | The number of minutes between transaction log backups | `30`
+`log_retention_days` | The number of days to keep transaction logs | `7`
+
+#### refresh_all_vcenters
+
+##### Action: set
+
+Refreshes the inventory for all vCenter servers on the Rubrik cluster
+
+Example usage:
+
+```ruby
+rubrik_refresh_all_vcenters 'set' do
+  action :set
+end
+```
+
+#### refresh_host
+
+##### Action: set
+
+Refreshes the inventory for the current host
+
+Example usage:
+
+```ruby
+rubrik_refresh_host 'set' do
+  action :set
+end
 ```
 
 ### Recipes

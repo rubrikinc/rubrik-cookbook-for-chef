@@ -42,20 +42,25 @@ action :set do
       existing_fileset = Rubrik::Api::Fileset.get_fileset_by_name_for_host('https://' + node['rubrik_host'], token, host_id, fileset)
       if existing_fileset.count == 0
         Chef::Log.info ("Fileset " + fileset + " does not presently exist for this host, creating...")
-        create_fileset = Rubrik::Api::Fileset.create_fileset(hosturi, token, host_id, fileset_template_id)
-        if create_fileset.nil?
-          Chef::Log.error "Something went wrong creating the fileset"
+        fileset_template = Rubrik::Api::FilesetTemplate.get_fileset_template_by_name('https://' + node['rubrik_host'], token, fileset)
+        if fileset_template == false
+          Chef::Log.error "Unable to find fileset template named " + fileset
         else
-          fileset_id = create_fileset['id']
-          sla_domain_id = Rubrik::ConfMgmt::Helpers.get_sla_domain_id('https://' + node['rubrik_host'], token, node['rubrik_sla_domain'])
-          if sla_domain_id.nil?
-            Chef::Log.error "Something went wrong getting the SLA domain"
+          create_fileset = Rubrik::Api::Fileset.create_fileset('https://' + node['rubrik_host'], token, host_id, fileset_template['id'])
+          if create_fileset == false
+            Chef::Log.error "Something went wrong creating the fileset"
           else
-            update_fileset = Rubrik::Api::Fileset.update_fileset(hosturi, token, fileset_id, sla_domain_id)
-            if update_fileset.nil?
-              Chef::Log.error "Something went wrong updating the fileset"
+            fileset_id = create_fileset['id']
+            sla_domain_id = Rubrik::ConfMgmt::Helpers.get_sla_domain_id('https://' + node['rubrik_host'], token, node['rubrik_sla_domain'])
+            if sla_domain_id.nil?
+              Chef::Log.error "Something went wrong getting the SLA domain"
             else
-              Chef::Log.info ("Fileset created and updated succesfully")
+              update_fileset = Rubrik::Api::Fileset.update_fileset('https://' + node['rubrik_host'], token, fileset_id, sla_domain_id)
+              if update_fileset == false
+                Chef::Log.error "Something went wrong updating the fileset"
+              else
+                Chef::Log.info ("Fileset created and updated succesfully")
+              end
             end
           end
         end
@@ -76,7 +81,7 @@ action :set do
               Chef::Log.info ("Fileset updated succesfully")
             end
           end
-        end        
+        end
       end
     end
   end

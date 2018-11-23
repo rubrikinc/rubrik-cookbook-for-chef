@@ -1,10 +1,10 @@
 #
 # Cookbook:: rubrik
-# Recipe:: register_host
+# Recipe:: get_host_registration
 #
 # Copyright:: 2017, The Authors, All Rights Reserved.
 #
-# Registers the current host against the Rubrik cluster
+# Checks if current host is registered against the Rubrik cluster
 #
 rubrik_register_host 'get' do
   action :get
