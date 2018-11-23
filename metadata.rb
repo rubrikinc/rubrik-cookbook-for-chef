@@ -4,7 +4,7 @@ maintainer_email 'tim.hynes@rubrik.com'
 license 'All Rights Reserved'
 description 'Interacts with a Rubrik cluster'
 long_description 'Interacts with a Rubrik cluster, providing configuration and reporting functionality'
-version '0.2.0'
+version '0.3.0'
 chef_version '>= 12.1' if respond_to?(:chef_version)
 issues_url 'https://github.com/rubrik-devops/chef-rubrik/issues'
 source_url 'https://github.com/rubrik-devops/chef-rubrik'
