@@ -1,8 +1,8 @@
-# Rubrik Chef Cookbook
+# Rubrik Cookbook for Chef
 
 ## Overview
 
-The Rubrik Chef cookbook is used to configure a host with an SLA domain, and install the Rubrik connector.
+The Rubrik Cookbook for Chef is used to configure a host with an SLA domain, and install the Rubrik connector.
 
 ## Requirements
 
