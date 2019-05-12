@@ -9,7 +9,7 @@ assignees: ''
 
 ---
 name: Bug Report
-about: Report a bug encountered while using the Rubrik SDK for Python.
+about: Report a bug encountered while using the Rubrik Cookbook for Chef
 title: ''
 labels: kind-bug
 assignees: ''
