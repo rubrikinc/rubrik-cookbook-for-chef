@@ -33,10 +33,10 @@ action :set do
   # get current SLA domain
   host_id = Rubrik::ConfMgmt::Core.get_registered_host_id('https://' + node['rubrik_host'], token, [ node['hostname'], node['ipaddress'] ])
   if host_id.nil?
-    Chef::Log.info ("Host is not registered against the Rubrik cluster")
+    Chef::Log.info ('Host is not registered against the Rubrik cluster')
     break
   else
-    Chef::Log.info ("Host Current host ID is: " + host_id)
+    Chef::Log.info ('Host Current host ID is: ' + host_id)
     host_filesets = Rubrik::Api::Fileset.get_filesets_for_host('https://' + node['rubrik_host'], token, host_id)
     for fileset in node['rubrik_fileset']
       existing_fileset = Rubrik::Api::Fileset.get_fileset_by_name_for_host('https://' + node['rubrik_host'], token, host_id, fileset)

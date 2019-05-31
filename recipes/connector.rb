@@ -10,7 +10,12 @@
 # cluster is presenting a self-signed certificate, which will cause the
 # 'remote_file' resource to reject the download
 require 'openssl'
+
+# this block will skip over SSL verification, and suppress any errors
+original_verbose = $VERBOSE
+$VERBOSE = nil
 OpenSSL::SSL::VERIFY_PEER = OpenSSL::SSL::VERIFY_NONE
+$VERBOSE = original_verbose
 
 # Determine the details for the platform running the Chef client. This
 # helps us genericise the remainder of the code
@@ -20,7 +25,7 @@ when 'windows'
   target_file = 'C:\Windows\Temp\RubrikBackupService.zip'
   pkg_resource = :windows_package
   test_file = 'C:\Program Files\Rubrik\Rubrik Backup Service\rbs.exe'
-when 'centos','redhat','fedora','suse'
+when 'centos', 'redhat', 'fedora', 'suse'
   download_uri = 'connector/rubrik-agent.x86_64.rpm'
   target_file = '/tmp/rubrik-agent.x86_64.rpm'
   pkg_resource = :rpm_package
@@ -54,12 +59,13 @@ end
 declare_resource(pkg_resource, target_file) do
   action :install
   not_if { ::File.exist?(test_file) }
-  notifies :run, "execute[Setting Log On User For Rubrik Backup Service]", :immediately
+  notifies :run, 'execute[Setting Log On User For Rubrik Backup Service]', :immediately
 end
 
-execute "Setting Log On User For Rubrik Backup Service" do
-  command "sc.exe config \"Rubrik Backup Service\" obj="+node['rubrik_win_sa_user']+" password="+node['rubrik_win_sa_pass']
+execute 'Setting Log On User For Rubrik Backup Service' do
+  command 'sc.exe config \'Rubrik Backup Service\' obj=' + node['rubrik_win_sa_user'] + ' password=' + node['rubrik_win_sa_pass']
   action :nothing
+  sensitive true
   only_if { node['platform'] == 'windows' }
   only_if { node['rubrik_win_sa_user'] }
   only_if { node['rubrik_win_sa_pass'] }

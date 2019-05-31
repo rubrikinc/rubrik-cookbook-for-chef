@@ -17,6 +17,7 @@ rubrik_sla_domain | Defines the Rubrik SLA Domain to protect objects with | Gold
 rubrik_win_sa_user | Windows systems - defines the login user for the Rubrik Backup Service | sa_rubrik@demo.com
 rubrik_win_sa_pass | Windows systems - defines the password for above RBS user | Rubrik123!
 rubrik_fileset | Defines a list of fileset templates used to create filesets on this host | ['fileset_1', 'fileset_2']
+rubrik_org_name | Defines the Organization to add the host to | 'ITOps'
 
 Note that `rubrik_win_sa_user` and `rubrik_win_sa_pass` are optional, and will only be required if installing the
 connector on a Windows system. If these are omitted then the service will run as LocalSystem.
@@ -78,6 +79,14 @@ The sample recipes included with the cookbook can be run individually through th
 ### Refresh All vCenter Servers
 
 `sudo chef-client -z -r 'recipe[rubrik::refresh_all_vcenters]' -l info`
+
+### Check Organization membership
+
+`sudo chef-client -z -r 'recipe[rubrik::get_object_organization]' -l info`
+
+### Set Organization membership
+
+`sudo chef-client -z -r 'recipe[rubrik::set_object_organization]' -l info`
 
 ## Detail
 
@@ -348,6 +357,41 @@ Example usage:
 include_recipe 'rubrik::connector'
 ```
 
-## Limitations
+### object_organization
 
-Presently only works with VMware virtual machines, and relies on the vCenter being up to date in the Rubrik cluster.
+#### Action: get
+
+Checks if the current object is added to the Organization name set in  `node['rubrik_org_name']`. Can specify object_type as `vmwarevm` (default), or `host` to add a physical host.
+
+```ruby
+rubrik_object_organization 'get' do
+  action :get
+  object_type 'host'
+end
+```
+
+Example output:
+
+```none
+[2019-05-31T09:12:35+01:00] INFO: Processing rubrik_object_organization[get] action get (rubrik::get_object_organization line 9)
+[2019-05-31T09:12:37+01:00] INFO: This object is currently assigned to Organization with name: DEVOPS
+```
+
+
+#### Action: set
+
+Updates the Organization for the current object, to that set in `node['rubrik_org_name']`. Can specify object_type as `vmwarevm` (default), or `host` to add a physical host.
+
+Example usage:
+
+```ruby
+rubrik_object_organization 'set' do
+  action :set
+  object_type 'host'
+end
+```
+
+```none
+[2019-05-31T09:12:23+01:00] INFO: Processing rubrik_object_organization[set] action set (rubrik::set_object_organization line 9)
+[2019-05-31T09:12:26+01:00] INFO: Assigned object to Organization with name: DEVOPS
+```
