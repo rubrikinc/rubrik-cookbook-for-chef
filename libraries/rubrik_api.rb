@@ -274,14 +274,15 @@ module Rubrik
         if body['total'].zero?
           return 'error'
         end
-        if body['total'] > 1
+
+        if body['total'] > 0
           body['data'].each do |ret_vm|
             if ret_vm['name'] == vm_name
-              ret_vm
+              return ret_vm
             end
           end
         end
-        body['data']
+        'error'
       end
 
       # Get summary of a single VM by name
@@ -471,6 +472,52 @@ module Rubrik
       end
     end
 
+    # Organisations
+    module Organizations
+      # Get all organization summary
+      def self.get_all_organizations(hosturi, token)
+        url = URI(hosturi + '/api/internal/organization')
+        response = Api::Helpers.http_get_request(url, token)
+        body = JSON.parse(response.read_body)
+        body['data']
+      end
+
+      # Get summary of a single organization by name
+      def self.get_single_org_by_name(hosturi, token, org_name)
+        all_orgs = Api::Organizations.get_all_organizations(hosturi, token)
+        all_orgs.each do |org|
+          return org if org['name'] == org_name
+        end
+      end
+
+      # Get a list of managable objects for an organization
+      def self.get_org_managable_objects(hosturi, token, org_id)
+        url = URI(hosturi + '/api/internal/authorization/role/organization?principals='+org_id+'&organization_id='+org_id)
+        response = Api::Helpers.http_get_request(url, token)
+        body = JSON.parse(response.read_body)
+        body['data'][0]['privileges']['manageResource']
+      end
+
+      # Add an object to an organization
+      def self.add_object_to_org(hosturi, token, object_id, org_id)
+        managed_objects = Api::Organizations.get_org_managable_objects(hosturi,token,org_id)
+        managed_objects.each do |resource_id|
+          return 'object already in organization' if resource_id == object_id
+        end
+        body = {
+          'principals' => [org_id], 'organizationId' => org_id,
+          'privileges' => { 'manageCluster' => [], 'manageResource' => [object_id],
+            'useSla' => [], 'manageSla' => [] }
+        }
+        url = URI(hosturi + '/api/internal/authorization/role/organization')
+        response = Api::Helpers.http_post_request(url, token, JSON.dump(body))
+        return 'error' if response.code != '200'
+
+        body = JSON.parse(response.read_body)
+        body
+      end
+    end
+
     # Session management
     module Session
       # Create new session
@@ -603,12 +650,12 @@ module Rubrik
         if vm_data == 'error'
           raise('VMware Virtual Machine with name ' + vm_info[0] + ' or IP address ' + vm_info[1] + ' not found.')
         end
-        vm_data[0]['configuredSlaDomainName']
-        conf_sla_domain_name = vm_data[0]['configuredSlaDomainName']
+
+        conf_sla_domain_name = vm_data['configuredSlaDomainName']
         if conf_sla_domain_name != 'Inherit'
           return conf_sla_domain_name
         end
-        effective_sla_domain_name = vm_data[0]['effectiveSlaDomainName']
+        effective_sla_domain_name = vm_data['effectiveSlaDomainName']
         effective_sla_domain_name
       end
 
@@ -728,7 +775,8 @@ module Rubrik
         if vm_data == 'error'
           raise('VMware Virtual Machine with name ' + vm_info[0] + ' or IP address ' + vm_info[1] + ' not found.')
         end
-        vm_data[0]['id']
+
+        vm_data['id']
       end
 
       # Get the SLA domain ID for a given SLA domain
