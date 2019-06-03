@@ -63,10 +63,10 @@ declare_resource(pkg_resource, target_file) do
 end
 
 execute 'Setting Log On User For Rubrik Backup Service' do
-  command 'sc.exe config \'Rubrik Backup Service\' obj=' + node['rubrik_win_sa_user'] + ' password=' + node['rubrik_win_sa_pass']
+  command 'sc.exe config "Rubrik Backup Service" obj= ' + node['rubrik_win_sa_user'] + ' password= ' + node['rubrik_win_sa_pass']
   action :nothing
   sensitive true
   only_if { node['platform'] == 'windows' }
-  only_if { node['rubrik_win_sa_user'] }
-  only_if { node['rubrik_win_sa_pass'] }
+  only_if { defined?(node['rubrik_win_sa_user']) }
+  only_if { defined?(node['rubrik_win_sa_pass']) }
 end
