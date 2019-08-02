@@ -18,6 +18,7 @@ rubrik_win_sa_user | Windows systems - defines the login user for the Rubrik Bac
 rubrik_win_sa_pass | Windows systems - defines the password for above RBS user | Rubrik123!
 rubrik_fileset | Defines a list of fileset templates used to create filesets on this host | ['fileset_1', 'fileset_2']
 rubrik_org_name | Defines the Organization to add the host to | 'ITOps'
+rubrik_http_timeout | Defines the HTTP timeout in seconds (default: 60) | 100
 
 Note that `rubrik_win_sa_user` and `rubrik_win_sa_pass` are optional, and will only be required if installing the
 connector on a Windows system. If these are omitted then the service will run as LocalSystem.
