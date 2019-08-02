@@ -7,5 +7,5 @@
 # Refreshes the inventory of the all vCenter servers on the Rubrik cluster
 #
 rubrik_refresh_all_vcenters 'set' do
-    action :set
+  action :set
 end
