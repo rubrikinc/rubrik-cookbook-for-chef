@@ -167,6 +167,8 @@ Property name | Description | Default Value
 --- | --- | ---
 `crash_consistent` | Specifies whether to force crash consistent snapshots, can be `true` or `false` | `false`
 
+**NOTE:** For SQL Server VMs, if backup of the SQL DB is via the Rubrik Backup Service, this should be explicitly set to `false` for VM protection.
+
 #### snapshot_vmware_vm
 
 ##### Action: set
