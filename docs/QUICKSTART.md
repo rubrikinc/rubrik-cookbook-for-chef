@@ -4,6 +4,8 @@
 
 The Rubrik Chef cookbook is used to configure hosts on the Rubrik system, and install the Rubrik connector.
 
+NOTE: This has been tested with Chef versions 13, 14 and 15.
+
 ## Requirements
 
 The following node attributes should be defined in order to use this cookbook:
